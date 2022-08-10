@@ -9,6 +9,7 @@ const WalletAddress = "0xAD00C05940c158b42c9033209837C18266fFd8DD"
 
 function App() {
   const [images, setImages] = useState([])
+  const [loading, setLoading] = useState(false)
 
   useEffect(() => {
     setImages([]);
@@ -24,7 +25,6 @@ function App() {
       requestAccount();
       const provider = new ethers.providers.Web3Provider(window.ethereum)
       const signer = provider.getSigner()
-      console.log(provider, signer)
       const contract = new ethers.Contract(NFTAddress, NFT.abi, signer)
 
       try {
@@ -44,6 +44,7 @@ function App() {
       const provider = new ethers.providers.Web3Provider(window.ethereum)
       const contract = new ethers.Contract(NFTAddress, NFT.abi, provider)
       try {
+        setLoading(true);
         const count = await contract.getTokenCounts();
 
         for(let i = 0 ; i < parseInt(count); i++ ) {
@@ -53,6 +54,7 @@ function App() {
               setImages((images) => [...images, results])
             })
         }
+        setLoading(false);
       } catch (err) {
         console.log("Error: ", err)
       }
@@ -62,14 +64,16 @@ function App() {
   return (
     <div className="App">
       <button className="button" onClick={handleMint}>MINT</button>
-      <div className="grid-container">
+      {loading === false ?
+        <div className="grid-container">
         {images.map((image, index) => <div key={index} className="d-flex justify-content-center">
           <span>
           <img src={image.image} alt={image.name} width="500"></img>
           <p>{image.description}</p>
           </span>
         </div>)}
-      </div>
+      </div> : "Loading..."
+      }
     </div>
   );
 }
